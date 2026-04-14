@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visioner – Productivity Workspace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div id="sidebar">
+  <div class="sidebar-top">
+    <div class="ws-header">
+      <div class="ws-avatar">V</div>
+      <div class="ws-name">Visioner</div>
+    </div>
+    <div class="sidebar-action" onclick="openSearch()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      Cari
+      <span style="margin-left:auto;font-size:11px;color:var(--text3)">⌘K</span>
+    </div>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <!-- NAV -->
+  <div style="padding:4px 10px;display:flex;flex-direction:column;gap:2px">
+    <div class="nav-item active" id="nav-editor" onclick="switchView('editor')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Workspace
+    </div>
+    <div class="nav-item" id="nav-tasks" onclick="switchView('tasks')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Manajemen Tugas
+    </div>
+    <div class="nav-item" id="nav-notes" onclick="switchView('notes')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Catatan
+    </div>
+    <div class="nav-item" id="nav-pomodoro" onclick="switchView('pomodoro')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Timer Pomodoro
+    </div>
+  </div>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section-label">Halaman</div>
+  <div class="sidebar-pages" id="sidebar-pages"></div>
+
+  <div class="sidebar-bottom">
+    <div class="nav-item" onclick="newPage()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Halaman baru
+    </div>
+  </div>
+</div><!-- /sidebar -->
+
+<!-- ===== MAIN ===== -->
+<div id="main">
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <button class="tb-btn" onclick="toggleSidebar()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+    </button>
+    <div class="tb-breadcrumb" id="breadcrumb">
+      <span onclick="switchView('editor')">Visioner</span>
+      <span class="tb-sep">›</span>
+      <span id="bc-page">Workspace</span>
+    </div>
+    <div class="dark-toggle" onclick="toggleDark()" id="dark-toggle-btn">
+      <span id="dark-icon">🌙</span>
+      <span id="dark-label">Dark</span>
+    </div>
+    <button class="tb-btn" onclick="openSearch()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    </button>
+  </div>
+
+  <!-- VIEW CONTAINER -->
+  <div id="view-container">
+
+    <!-- EDITOR VIEW -->
+    <div class="view-panel active" id="panel-editor">
+      <div id="editor-area">
+        <div id="editor-wrap">
+          <div id="page-icon-wrap" onclick="openEmojiPicker(this)">📄</div>
+          <div id="add-cover-btn" onclick="showToast('Fitur cover coming soon!')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Tambah sampul
+          </div>
+          <textarea
+            id="page-title"
+            placeholder="Tanpa judul"
+            rows="1"
+            oninput="onTitleInput(this);updateTitle(this.value)"
+            onkeydown="titleKeydown(event)"
+          ></textarea>
+          <div id="blocks-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TASKS VIEW -->
+    <div class="view-panel" id="panel-tasks">
+      <div id="tasks-view">
+        <div class="view-title">📋 Manajemen Tugas</div>
+        <div class="view-subtitle">Susun &amp; pantau semua tugas berdasarkan deadline</div>
+        <div class="task-toolbar">
+          <input type="text" placeholder="🔍 Cari tugas..." id="task-search" oninput="renderTasks()">
+          <div class="filter-tabs" id="filter-tabs">
+            <div class="filter-tab active" onclick="setFilter('semua')">Semua</div>
+            <div class="filter-tab" onclick="setFilter('aktif')">Aktif</div>
+            <div class="filter-tab" onclick="setFilter('selesai')">Selesai</div>
+            <div class="filter-tab" onclick="setFilter('terlambat')">Terlambat</div>
+          </div>
+          <button class="btn-primary" onclick="openTaskModal()">＋ Tambah Tugas</button>
+        </div>
+        <div class="tasks-list" id="tasks-list"></div>
+      </div>
+    </div>
+
+    <!-- NOTES VIEW -->
+    <div class="view-panel" id="panel-notes">
+      <div id="notes-view">
+        <div class="view-title">📝 Catatan</div>
+        <div class="view-subtitle" style="margin-bottom:16px">Catat ide &amp; informasi penting</div>
+        <div class="notes-toolbar">
+          <input type="text" placeholder="🔍 Cari catatan..." id="notes-search" oninput="renderNotes()">
+          <div class="view-toggle-btn active" id="grid-btn"
+            onclick="notesLayout='grid';renderNotes();this.classList.add('active');document.getElementById('list-btn').classList.remove('active')"
+            title="Grid">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </div>
+          <div class="view-toggle-btn" id="list-btn"
+            onclick="notesLayout='list';renderNotes();this.classList.add('active');document.getElementById('grid-btn').classList.remove('active')"
+            title="List">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </div>
+          <button class="btn-primary" onclick="openNoteEditor(null)">＋ Catatan Baru</button>
+        </div>
+        <div id="notes-container"></div>
+      </div>
+    </div>
+
+    <!-- POMODORO VIEW -->
+    <div class="view-panel" id="panel-pomodoro">
+      <div id="pomodoro-view">
+        <div class="pomo-header">
+          <div class="view-title" style="font-size:28px;margin-bottom:4px">🍅 Timer Pomodoro</div>
+          <div style="font-size:13px;color:var(--text2)">Fokus kerja dengan teknik Pomodoro</div>
+        </div>
+        <div class="pomo-tabs">
+          <div class="pomo-tab active" id="tab-work"  onclick="switchPomoMode('work')">Kerja (25 min)</div>
+          <div class="pomo-tab"        id="tab-short" onclick="switchPomoMode('short')">Istirahat Pendek</div>
+          <div class="pomo-tab"        id="tab-long"  onclick="switchPomoMode('long')">Istirahat Panjang</div>
+        </div>
+        <div class="pomo-clock" id="pomo-clock">
+          <div class="pomo-ring-wrap">
+            <svg class="pomo-ring" viewBox="0 0 220 220">
+              <circle class="pomo-ring-track" cx="110" cy="110" r="97"/>
+              <circle class="pomo-ring-fill" id="pomo-ring-fill" cx="110" cy="110" r="97"
+                stroke="#ef4444" stroke-dasharray="609.5" stroke-dashoffset="0"/>
+            </svg>
+          </div>
+          <div class="pomo-time" id="pomo-display">25:00</div>
+          <div class="pomo-label" id="pomo-status">Siap bekerja</div>
+        </div>
+        <div class="pomo-dots" id="pomo-dots"></div>
+        <div class="pomo-controls">
+          <button class="pomo-btn pomo-btn-secondary" onclick="resetPomo()">↺ Reset</button>
+          <button class="pomo-btn pomo-btn-primary" id="pomo-start-btn" onclick="togglePomo()">▶ Mulai</button>
+          <button class="pomo-btn pomo-btn-secondary" onclick="skipPomo()">⏭ Skip</button>
+        </div>
+        <div class="pomo-settings">
+          <h4>⚙️ Pengaturan Durasi</h4>
+          <div class="pomo-setting-row">
+            <label>Sesi Kerja (menit)</label>
+            <input type="number" id="set-work" value="25" min="1" max="90" onchange="updatePomoSettings()">
+          </div>
+          <div class="pomo-setting-row">
+            <label>Istirahat Pendek (menit)</label>
+            <input type="number" id="set-short" value="5" min="1" max="30" onchange="updatePomoSettings()">
+          </div>
+          <div class="pomo-setting-row">
+            <label>Istirahat Panjang (menit)</label>
+            <input type="number" id="set-long" value="20" min="5" max="60" onchange="updatePomoSettings()">
+          </div>
+        </div>
+        <div class="pomo-history">
+          <h4>📊 Riwayat Sesi</h4>
+          <div id="pomo-history-list">
+            <div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Belum ada sesi selesai</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /view-container -->
+</div><!-- /main -->
+
+<!-- ===== FLOATING UI ELEMENTS ===== -->
+
+<!-- Slash menu -->
+<div id="slash-menu"></div>
+
+<!-- Context menu -->
+<div id="ctx-menu"></div>
+
+<!-- Format toolbar -->
+<div id="format-toolbar">
+  <div class="fmt-btn" onclick="execFmt('bold')"><b>B</b></div>
+  <div class="fmt-btn" onclick="execFmt('italic')"><i>I</i></div>
+  <div class="fmt-btn" onclick="execFmt('underline')" style="text-decoration:underline">U</div>
+  <div class="fmt-btn" onclick="execFmt('strikeThrough')" style="text-decoration:line-through">S</div>
+  <div class="fmt-sep"></div>
+  <div class="fmt-btn" onclick="execFmt('foreColor','#ef4444')" style="color:#ef4444">A</div>
+  <div class="fmt-btn" onclick="execFmt('foreColor','#3b82f6')" style="color:#3b82f6">A</div>
+  <div class="fmt-btn" onclick="execFmt('foreColor','#22c55e')" style="color:#22c55e">A</div>
+</div>
+
+<!-- Emoji picker -->
+<div id="emoji-picker">
+  <input class="emoji-search" placeholder="Cari emoji..." oninput="filterEmoji(this.value)">
+  <div class="emoji-grid" id="emoji-grid"></div>
+</div>
+
+<!-- Search modal -->
+<div id="search-modal">
+  <div class="search-box">
+    <input
+      id="search-input"
+      placeholder="Cari halaman, tugas, catatan..."
+      oninput="doSearch(this.value)"
+      onkeydown="if(event.key==='Escape')closeSearch()"
+    >
+    <div class="search-results" id="search-results"></div>
+  </div>
+</div>
+
+<!-- Task modal -->
+<div class="modal-overlay" id="task-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="task-modal-title">Tambah Tugas Baru</h3>
+      <button class="tb-btn" onclick="closeTaskModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="task-edit-id">
+      <div class="form-group">
+        <label>Nama Tugas *</label>
+        <input type="text" id="task-name" placeholder="Judul tugas...">
+      </div>
+      <div class="form-group">
+        <label>Deskripsi</label>
+        <textarea id="task-desc" placeholder="Deskripsi singkat..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Deadline *</label>
+        <input type="date" id="task-deadline">
+      </div>
+      <div class="form-group">
+        <label>Kategori</label>
+        <select id="task-cat">
+          <option value="Umum">Umum</option>
+          <option value="Kuliah">Kuliah</option>
+          <option value="Pekerjaan">Pekerjaan</option>
+          <option value="Pribadi">Pribadi</option>
+          <option value="Proyek">Proyek</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeTaskModal()">Batal</button>
+      <button class="btn-primary" onclick="saveTask()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Note editor -->
+<div id="note-editor-overlay">
+  <div id="note-editor-box">
+    <div class="ne-toolbar">
+      <button class="ne-fmt-btn" onclick="execNoteFmt('bold')"><b>B</b></button>
+      <button class="ne-fmt-btn" onclick="execNoteFmt('italic')"><i>I</i></button>
+      <button class="ne-fmt-btn" onclick="execNoteFmt('insertUnorderedList')">• List</button>
+      <div style="flex:1"></div>
+      <label style="font-size:12px;color:var(--text2);margin-right:8px">Tautkan ke tugas:</label>
+      <select id="ne-task-link" style="font-size:12px;padding:3px 8px;border:1px solid var(--border);border-radius:6px;background:var(--input-bg);color:var(--text)">
+        <option value="">— Tidak ada —</option>
+      </select>
+      <div style="width:8px"></div>
+      <button class="tb-btn" onclick="closeNoteEditor()">✕</button>
+    </div>
+    <input type="hidden" id="ne-id">
+    <input id="ne-title" placeholder="Judul catatan...">
+    <textarea id="ne-body" placeholder="Tulis catatan di sini... (auto-save aktif)"></textarea>
+    <div class="ne-footer">
+      <span id="ne-autosave-status">Auto-save aktif</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" style="padding:5px 14px;font-size:12px"
+          onclick="deleteNote(document.getElementById('ne-id').value);closeNoteEditor()">Hapus</button>
+        <button class="btn-primary" style="padding:5px 14px;font-size:12px"
+          onclick="saveNoteManual()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<!-- Audio ding for pomodoro -->
+<audio id="ding" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbyr9vSzJPjtXi0bh4RClBftXo3MGEUiE3btLt5sqLWyxAfNvsz7OAXCU6c9ns1LiHWzBIgdvs0bWUaTlTi93q1LuOZTdYkt3r1r2RaThblebr2L+UajpgmuDq2cCXbT1mm+Pq2cOabz5qn+Tq2cSdb0Bso+Xq2sabcEFvo+Xq2sWccUJxpOXq2sWecUJxpeXq2sWecUNypeXr2sWecUNypeXr2sWecUNypeXr2sWecUNypeXr" preload="auto" style="display:none"></audio>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="app.js"></script>
+
+</body>
+</html>
